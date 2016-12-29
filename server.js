@@ -5,12 +5,21 @@ var express = require('express'),
     eps     = require('ejs'),
     mongoose= require('mongoose'),
     morgan  = require('morgan'),
+    bodyParser=require('body-parser'),
     esquema = mongoose.Schema;
     
 Object.assign=require('object-assign')
 
-app.engine('html', require('ejs').renderFile);
+app.set("view engine", "jade");
 app.use(morgan('combined'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+
+var postear = new esquema({
+  comentario: {type: String}
+});
+
+var Publicar = mongoose.model("one",postear);
 
 mongoose.connect("mongodb://172.30.157.148:27017/sampledb");
 
@@ -74,11 +83,43 @@ app.get('/', function (req, res) {
     // Create a document with request IP and current time of request
     col.insert({ip: req.ip, date: Date.now()});
     col.count(function(err, count){
-      res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
+      res.render('index.jade', { pageCountMessage : count, dbInfo: dbDetails });
     });
   } else {
-    res.render('index.html', { pageCountMessage : null});
+    res.render('index.jade', { pageCountMessage : null});
   }
+});
+
+app.get('/cuenta', function(req,res){
+  res.render("menu.jade")
+});
+
+app.get("/ver",function(req,res){
+  res.render("mostrar.jade")
+});
+
+app.post("/ver",function(req,res){
+  var data =  new Publicar({
+    comentario: req.body.publicacion
+  })
+  var product = new Publicar(data);
+  console.log(data)
+  product.save(function(err){
+    if(err){
+      console.log("no se puede publicar");
+    }
+    else
+      console.log("se realizo una publicacion")
+      res.render("mostrar.jade",{product: product})
+  })
+});
+
+app.get("/all",function(req,res){
+  Publicar.find(function(error,documents){
+    if(error){console.log(error);}
+    res.render("all",{publics : documents})
+    console.log(documents)
+  })
 });
 
 app.get('/pagecount', function (req, res) {
