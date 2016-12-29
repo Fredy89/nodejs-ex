@@ -3,12 +3,18 @@ var express = require('express'),
     fs      = require('fs'),
     app     = express(),
     eps     = require('ejs'),
-    morgan  = require('morgan');
+    mongoose= require('mongoose'),
+    morgan  = require('morgan'),
+    esquema = mongoose.Schema;
     
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
-app.use(morgan('combined'))
+app.use(morgan('combined'));
+
+var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/hey';
+
+mongoose.connect(connectionString);
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
@@ -24,7 +30,7 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
       mongoUser = process.env[mongoServiceName + '_USER'];
 
   if (mongoHost && mongoPort && mongoDatabase) {
-    mongoURLLabel = mongoURL = 'mongodb://';
+    mongoURLLabel = mongoURL = 'mongodb://172.30.157.148:27017/sampledb';
     if (mongoUser && mongoPassword) {
       mongoURL += mongoUser + ':' + mongoPassword + '@';
     }
