@@ -36,7 +36,7 @@ if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
   process.env.OPENSHIFT_APP_NAME;
 }
 
-mongoose.connect("mongodb://localhost/sampledb");
+mongoose.connect("mongodb://172.30.157.148:27017/sampledb");
 
 app.get('/', function (req, res) {
 
